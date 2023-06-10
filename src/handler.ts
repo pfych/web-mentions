@@ -123,7 +123,7 @@ app.get(
 
       return response.status(200).json(statusObject);
     } catch (e) {
-      return response.status(400).json({
+      return response.status(500).json({
         code: 'UNKNOWN' as ERROR_CODE,
       });
     }
@@ -152,7 +152,7 @@ app.post(
       return response.status(200).json([...(statusObject || [])]);
     } catch (e) {
       console.error('Query failed ungracefully: ', e);
-      return response.status(400).json({
+      return response.status(500).json({
         code: 'UNKNOWN' as ERROR_CODE,
       });
     }
