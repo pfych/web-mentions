@@ -1,0 +1,6 @@
+.dynamodb
+.esbuild
+node_modules
+
+.idea
+.vscode

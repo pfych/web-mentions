@@ -1,0 +1,11 @@
+web-mentions:
+  handler: src/handler.handler
+  events:
+    - http:
+        method: ANY
+        path: /web-mentions
+        cors: true
+    - http:
+        method: ANY
+        path: /web-mentions/{any+}
+        cors: true
