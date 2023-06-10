@@ -4,7 +4,13 @@
   "description": "Web mention receiver deployed to AWS with serverless",
   "author": "Pfych (https://pfy.ch)",
   "license": "MIT",
-  "keywords": ["webmention", "webmentions", "aws", "serverless", "dynamodb"],
+  "keywords": [
+    "webmention",
+    "webmentions",
+    "aws",
+    "serverless",
+    "dynamodb"
+  ],
   "scripts": {
     "deploy:dev": "export AWS_PROFILE=$PROFILE && npx serverless deploy --verbose --stage dev --region $REGION --param=\"profile=$PROFILE\"",
     "deploy:prod": "export AWS_PROFILE=$PROFILE && npx serverless deploy --verbose --stage prod --region $REGION --param=\"profile=$PROFILE\"",
