@@ -1,8 +1,8 @@
 import {
-  ERROR_CODES,
+  ERROR_CODE,
   MentionObject,
   RequestContext,
-  STATUS_CODES,
+  STATUS_CODE,
   StatusObject,
 } from '../types';
 import cors from 'cors';
@@ -54,8 +54,8 @@ export const createStatus = async (
 
 export const updateStatus = async (args: {
   id: string;
-  status: STATUS_CODES;
-  errorCode?: ERROR_CODES;
+  status: STATUS_CODE;
+  errorCode?: ERROR_CODE;
 }): Promise<StatusObject> => {
   console.log('Updating status object', args);
   const dynamoDb = getConnection();

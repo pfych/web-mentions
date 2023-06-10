@@ -5,8 +5,8 @@ export type RequestContext = Request & {
   context: APIGatewayEventRequestContext;
 };
 
-export type STATUS_CODES = 'SUCCESS' | 'PENDING' | 'FAILED';
-export type ERROR_CODES =
+export type STATUS_CODE = 'SUCCESS' | 'PENDING' | 'FAILED';
+export type ERROR_CODE =
   | 'STATUS_GONE'
   | 'INVALID_INPUT'
   | 'SAME_URL'
@@ -17,8 +17,8 @@ export type ERROR_CODES =
 
 export interface StatusObject {
   id: string;
-  status: STATUS_CODES;
-  errorCode?: ERROR_CODES;
+  status: STATUS_CODE;
+  errorCode?: ERROR_CODE;
   source: string;
   target: string;
 }

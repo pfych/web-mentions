@@ -2,7 +2,12 @@ import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { get, getConnection, query } from './lib/dynamodb';
 import axios from 'axios';
-import { MentionObject, RequestContext, StatusObject } from './types';
+import {
+  ERROR_CODE,
+  MentionObject,
+  RequestContext,
+  StatusObject,
+} from './types';
 import {
   createApp,
   createHandler,
@@ -24,13 +29,11 @@ app.post(
       if (!source || !target) {
         return response
           .status(400)
-          .json({ error: 'Missing either source or target value' });
+          .json({ code: 'INVALID_INPUT' as ERROR_CODE });
       }
 
       if (source === target) {
-        return response
-          .status(400)
-          .json({ error: 'Source & Target cannot be the same' });
+        return response.status(400).json({ code: 'SAME_URL' as ERROR_CODE });
       }
 
       await createStatus({ id: statusId, status: 'PENDING', source, target });
@@ -101,9 +104,9 @@ app.post(
 
 app.get(
   '/web-mentions/status/:id',
-  async (req: RequestContext, res: Response) => {
+  async (request: RequestContext, response: Response) => {
     try {
-      const { id } = req.params;
+      const { id } = request.params;
       const dynamoDb = getConnection();
 
       const statusObject = await get<StatusObject>({
@@ -113,42 +116,45 @@ app.get(
       });
 
       if (!statusObject) {
-        return res.status(400).json({
-          code: 'STATUS_GONE',
+        return response.status(400).json({
+          code: 'STATUS_GONE' as ERROR_CODE,
         });
       }
 
-      return res.status(200).json(statusObject);
+      return response.status(200).json(statusObject);
     } catch (e) {
-      return res.status(400).json({
-        code: 'UNKNOWN',
+      return response.status(400).json({
+        code: 'UNKNOWN' as ERROR_CODE,
       });
     }
   },
 );
 
-app.post('/web-mentions/query', async (req: RequestContext, res: Response) => {
-  try {
-    const { target } = req.body;
-    const dynamoDb = getConnection();
+app.post(
+  '/web-mentions/query',
+  async (request: RequestContext, response: Response) => {
+    try {
+      const { target } = request.body;
+      const dynamoDb = getConnection();
 
-    if (!target) {
-      return res.status(400).json({ code: 'MISSING_TARGET' });
+      if (!target) {
+        return response.status(400).json({ code: 'MISSING_TARGET' });
+      }
+
+      const statusObject = await query<MentionObject>({
+        dynamoDb,
+        table: process.env.MENTION_TABLE,
+        keyName: 'target',
+        keyValue: target,
+        indexName: 'target-index',
+      });
+
+      return response.status(200).json([...(statusObject || [])]);
+    } catch (e) {
+      console.error('Query failed ungracefully: ', e);
+      return response.status(400).json({
+        code: 'UNKNOWN' as ERROR_CODE,
+      });
     }
-
-    const statusObject = await query<MentionObject>({
-      dynamoDb,
-      table: process.env.MENTION_TABLE,
-      keyName: 'target',
-      keyValue: target,
-      indexName: 'target-index',
-    });
-
-    return res.status(200).json([...(statusObject || [])]);
-  } catch (e) {
-    console.error('Query failed ungracefully: ', e);
-    return res.status(400).json({
-      code: 'UNKNOWN',
-    });
-  }
-});
+  },
+);
