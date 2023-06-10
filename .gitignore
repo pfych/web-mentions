@@ -1,5 +1,6 @@
 .dynamodb
 .esbuild
+.serverless
 node_modules
 
 .idea
