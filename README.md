@@ -23,7 +23,7 @@ pnpm install
 PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run deploy:dev
 ```
 
-**Deploy to development production**
+**Deploy to production environment**
 ```sh
 pnpm install
 PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run deploy:dev
