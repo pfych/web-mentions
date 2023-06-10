@@ -13,6 +13,7 @@ import {
   createHandler,
   createMention,
   createStatus,
+  isValidUrl,
   updateStatus,
 } from './lib/utils';
 
@@ -27,6 +28,12 @@ app.post(
 
     try {
       if (!source || !target) {
+        return response
+          .status(400)
+          .json({ code: 'INVALID_INPUT' as ERROR_CODE });
+      }
+
+      if (!isValidUrl(source) || !isValidUrl(target)) {
         return response
           .status(400)
           .json({ code: 'INVALID_INPUT' as ERROR_CODE });
