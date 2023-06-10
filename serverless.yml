@@ -32,6 +32,23 @@ provider:
   environment:
     STATUS_TABLE: status-table-${param:profile}-${opt:stage}
     MENTION_TABLE: mention-table-${param:profile}-${opt:stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchGetItem
+          Resource:
+            - !Sub ${statusTable.Arn}
+            - !Sub ${statusTable.Arn}/index/*
+            - !Sub ${mentionTable.Arn}
+            - !Sub ${mentionTable.Arn}/index/*
 
 resources:
   - ${file(./src/serverless-resources.yml)}
