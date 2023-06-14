@@ -16,7 +16,6 @@ Globals:
       Variables:
         STATUS_TABLE: !Ref statusTable
         MENTION_TABLE: !Ref mentionTable
-        NODE_OPTIONS: '--enable-source-maps'
 
 Resources:
   statusTable:
@@ -65,17 +64,6 @@ Resources:
 
   Webmention:
     Type: AWS::Serverless::Function
-    Connectors:
-      DynamoDB:
-        Properties:
-          Destination:
-            - Type: AWS::DynamoDB::Table
-              Arn: !GetAtt mentionTable.Arn
-            - Type: AWS::DynamoDB::Table
-              Arn: !GetAtt statusTable.Arn
-          Permissions:
-            - Read
-            - Write
     Properties:
       MemorySize: 512
       Timeout: 15
@@ -84,6 +72,23 @@ Resources:
       Runtime: nodejs14.x
       Architectures:
         - x86_64
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:BatchGetItem
+              Resource:
+                - !Sub ${statusTable.Arn}
+                - !Sub ${statusTable.Arn}/index/*
+                - !Sub ${mentionTable.Arn}
+                - !Sub ${mentionTable.Arn}/index/*
       Events:
         Root:
           Type: Api
