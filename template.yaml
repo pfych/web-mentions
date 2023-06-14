@@ -16,6 +16,7 @@ Globals:
       Variables:
         STATUS_TABLE: !Ref statusTable
         MENTION_TABLE: !Ref mentionTable
+        NODE_OPTIONS: '--enable-source-maps'
 
 Resources:
   statusTable:
@@ -67,9 +68,9 @@ Resources:
     Properties:
       MemorySize: 512
       Timeout: 15
-      CodeUri: .
+      CodeUri: .build
       Handler: handler.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs14.x
       Architectures:
         - x86_64
       Events:
@@ -83,16 +84,3 @@ Resources:
           Properties:
             Path: /web-mentions/{any+}
             Method: any
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: esm
-        Minify: false
-        OutExtension:
-          - .js=.mjs
-        Target: "esnext"
-        Sourcemap: true
-        EntryPoints:
-          - src/handler.ts
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
