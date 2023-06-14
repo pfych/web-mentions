@@ -3,7 +3,6 @@ import * as https from 'https';
 import {
   DocumentClient,
   GetItemInput,
-  Key,
   QueryInput,
 } from 'aws-sdk/clients/dynamodb';
 

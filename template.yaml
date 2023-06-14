@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Web Mentions
+  
+  AWS SAM Application for handling Web Mentions
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        STATUS_TABLE: !Ref statusTable
+        MENTION_TABLE: !Ref mentionTable
+
+Resources:
+  statusTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['', [!Ref AWS::StackName, '-status-table']]
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  mentionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['', [!Ref AWS::StackName, '-mention-table']]
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: target
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: target-index
+          KeySchema:
+            - AttributeName: target
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+
+  Webmention:
+    Type: AWS::Serverless::Function
+    Connectors:
+      DynamoDB:
+        Properties:
+          Destination:
+            - Type: AWS::DynamoDB::Table
+              Arn: !GetAtt mentionTable.Arn
+            - Type: AWS::DynamoDB::Table
+              Arn: !GetAtt statusTable.Arn
+          Permissions:
+            - Read
+            - Write
+    Properties:
+      MemorySize: 512
+      Timeout: 15
+      CodeUri: .
+      Handler: handler.handler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            Path: /web-mentions
+            Method: any
+        Sub:
+          Type: Api
+          Properties:
+            Path: /web-mentions/{any+}
+            Method: any
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: "esnext"
+        Sourcemap: true
+        EntryPoints:
+          - src/handler.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);

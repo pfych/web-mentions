@@ -1,6 +1,6 @@
 .dynamodb
 .esbuild
-.serverless
+.aws-sam
 node_modules
 
 .idea
