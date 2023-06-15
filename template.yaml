@@ -14,8 +14,8 @@ Globals:
   Function:
     Environment:
       Variables:
-        STATUS_TABLE: !Ref statusTable
-        MENTION_TABLE: !Ref mentionTable
+        STATUS_TABLE: !Join ['', [!Ref AWS::StackName, '-status-table']]
+        MENTION_TABLE: !Join ['', [!Ref AWS::StackName, '-mention-table']]
 
 Resources:
   statusTable:

@@ -2,6 +2,4 @@
 
 echo "Starting locally"
 
-# @TODO setup DynamoDB container
-
-sam local start-api
+sam local start-api --docker-network lambda-local

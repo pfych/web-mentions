@@ -6,7 +6,7 @@ import {
   QueryInput,
 } from 'aws-sdk/clients/dynamodb';
 
-const IS_OFFLINE = process.env.IS_OFFLINE === 'true';
+const IS_OFFLINE = process.env.AWS_SAM_LOCAL === 'true';
 
 export let dynamoDb: AWS.DynamoDB.DocumentClient | undefined = undefined;
 
@@ -20,7 +20,7 @@ const createNewClient = (): DocumentClient => {
   if (IS_OFFLINE) {
     connection = new AWS.DynamoDB.DocumentClient({
       region: 'localhost',
-      endpoint: 'http://localhost:8000',
+      endpoint: 'http://dynamodb:8000',
     });
   } else {
     connection = new AWS.DynamoDB.DocumentClient({

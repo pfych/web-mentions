@@ -6,14 +6,15 @@ cd "$PARENT_PATH" || exit
 
 cd ./dynamodb || exit
 
+docker network create lambda-local || true
 docker-compose up -d
 
 # Convert the Template YAML into JSON that create-table expects
 # Dump this to a temp file so its easy to "while read" later
 yq -o=json '.Resources | filter(.Type == "AWS::DynamoDB::Table")' ../template.yaml \
-  | jq --arg StackName "$STACK_NAME" \
+  | jq \
     '.[] | {
-      TableName: "\($StackName)\(.Properties.TableName[1][1])",
+      TableName: "local\(.Properties.TableName[1][1])",
       KeySchema: .Properties.KeySchema,
       AttributeDefinitions: .Properties.AttributeDefinitions,
       GlobalSecondaryIndexes: .Properties.GlobalSecondaryIndexes,
@@ -24,14 +25,10 @@ yq -o=json '.Resources | filter(.Type == "AWS::DynamoDB::Table")' ../template.ya
 # Remove Null GSI if it exists since create-table will crash if a value is null
 sed -i '' 's/,"GlobalSecondaryIndexes":null//g' tables-seed.txt
 
-clear
-
 # Run create table against each line in the seed data file
 while read -r line; do
    aws dynamodb create-table --no-cli-pager --endpoint-url http://localhost:8000 --cli-input-json "$line"
 done < tables-seed.txt
-
-clear
 
 echo "Created the following tables:"
 cat tables-seed.txt
@@ -44,5 +41,6 @@ read -r -n 1 -p "Press any key to safely shut down DynamoDB" KEY;
 
 docker-compose down
 rm -r data
+docker network rm lambda-local
 
 cd "$CURRENT_DIR" || exit
