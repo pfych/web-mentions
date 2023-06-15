@@ -15,7 +15,8 @@
     "build": "./scripts/build.sh",
     "deploy:dev": "export AWS_PROFILE=$PROFILE && pnpm run build && sam deploy --template template.yaml --profile $AWS_PROFILE --region $REGION --stack-name=\"$PROFILE-$npm_package_name-dev\" --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=Stage,ParameterValue=dev",
     "deploy:prod": "export AWS_PROFILE=$PROFILE && pnpm run build && sam deploy --template template.yaml --profile $AWS_PROFILE --region $REGION --stack-name=\"$PROFILE-$npm_package_name-prod\" --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=Stage,ParameterValue=prod",
-    "start": "./scripts/run-local.sh"
+    "start": "./scripts/run-local.sh",
+    "start:dynamo": "STACK_NAME=\"$PROFILE-$npm_package_name-dev\" ./dynamoDB/start-dynamodb.sh"
   },
   "dependencies": {
     "aws-lambda": "1.0.7",

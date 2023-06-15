@@ -10,10 +10,24 @@ Implementation of a Webmention receiver built in Typescript. This project uses t
 ### Prerequisites
 
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- [Docker](https://docs.docker.com/desktop/) 
+- [Docker](https://docs.docker.com/desktop/)
+- [yq](https://github.com/mikefarah/yq) ([MacOS](https://formulae.brew.sh/formula/yq))
+- [jq](https://jqlang.github.io/jq/)
 
+### Starting
+
+Install dependencies:
 ```sh
 pnpm install
+```
+
+Start the local dynamoDB instances container and seed the tables:
+```sh
+PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run start:dynamo
+```
+
+Start the local lambda session with SAM:
+```sh
 PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run start
 ```
 
