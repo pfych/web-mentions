@@ -1,7 +1,9 @@
 .dynamodb
 .esbuild
-.serverless
+.build
 node_modules
 
 .idea
 .vscode
+
+dynamoDB/data

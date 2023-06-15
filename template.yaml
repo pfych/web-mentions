@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Web Mentions
+  
+  AWS SAM Application for handling Web Mentions
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        STATUS_TABLE: !Join ['', [!Ref AWS::StackName, '-status-table']]
+        MENTION_TABLE: !Join ['', [!Ref AWS::StackName, '-mention-table']]
+
+Resources:
+  statusTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['', [!Ref AWS::StackName, '-status-table']]
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  mentionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['', [!Ref AWS::StackName, '-mention-table']]
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: target
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: target-index
+          KeySchema:
+            - AttributeName: target
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Cors: "'*'"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 500
+
+  Webmention:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 512
+      Timeout: 15
+      CodeUri: .build
+      Handler: handler.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:BatchGetItem
+              Resource:
+                - !Sub ${statusTable.Arn}
+                - !Sub ${statusTable.Arn}/index/*
+                - !Sub ${mentionTable.Arn}
+                - !Sub ${mentionTable.Arn}/index/*
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            Path: /web-mentions
+            Method: any
+            RestApiId:
+              Ref: ApiGatewayApi
+        Sub:
+          Type: Api
+          Properties:
+            Path: /web-mentions/{any+}
+            Method: any
+            RestApiId:
+              Ref: ApiGatewayApi

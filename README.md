@@ -4,18 +4,36 @@
 
 Implementation of a Webmention receiver built in Typescript. This project uses the serverless framework for Deployment to AWS & uses two DynamoDB tables for storing data. By using these services we can deploy an extremely fast & extremely cheap webmention receiver that can be easily deployed & integrated into existing sites.
 
+
 ## Development
 
+### Prerequisites
+
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+- [Docker](https://docs.docker.com/desktop/)
+- [yq](https://github.com/mikefarah/yq) ([MacOS](https://formulae.brew.sh/formula/yq))
+- [jq](https://jqlang.github.io/jq/)
+
+### Starting
+
+Install dependencies:
 ```sh
 pnpm install
+```
+
+Start the local dynamoDB instances container and seed the tables:
+```sh
+PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run start:dynamo
+```
+
+Start the local lambda session with SAM:
+```sh
 PROFILE="aws-profile-name" REGION="ap-southeast-2" pnpm run start
 ```
 
 You may have to restart serverless and rerun `pnpm run start` after making changes.
 
 ## Deployment
-
-Ensure you have `awscli` installed on your system & have configured a profile.
 
 **Deploy to development environment**
 ```sh
