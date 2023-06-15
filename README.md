@@ -35,8 +35,6 @@ You may have to restart serverless and rerun `pnpm run start` after making chang
 
 ## Deployment
 
-Ensure you have `awscli` installed on your system & have configured a profile.
-
 **Deploy to development environment**
 ```sh
 pnpm install
