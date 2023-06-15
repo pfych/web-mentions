@@ -8,6 +8,8 @@ cd ./dynamodb || exit
 
 docker-compose up -d
 
+# Convert the Template YAML into JSON that create-table expects
+# Dump this to a temp file so its easy to "while read" later
 yq -o=json '.Resources | filter(.Type == "AWS::DynamoDB::Table")' ../template.yaml \
   | jq --arg StackName "$STACK_NAME" \
     '.[] | {
@@ -19,10 +21,12 @@ yq -o=json '.Resources | filter(.Type == "AWS::DynamoDB::Table")' ../template.ya
     }' \
   | jq -c '.' > tables-seed.txt
 
+# Remove Null GSI if it exists since create-table will crash if a value is null
 sed -i '' 's/,"GlobalSecondaryIndexes":null//g' tables-seed.txt
 
 clear
 
+# Run create table against each line in the seed data file
 while read -r line; do
    aws dynamodb create-table --no-cli-pager --endpoint-url http://localhost:8000 --cli-input-json "$line"
 done < tables-seed.txt
